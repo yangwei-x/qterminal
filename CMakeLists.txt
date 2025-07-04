@@ -48,7 +48,7 @@ include(LXQtTranslateTs)
 include(LXQtTranslateDesktop)
 
 # Add qtermwidget as a subdirectory to build it as a static library
-add_subdirectory(../qtermwidget qtermwidget)
+add_subdirectory(qtermwidget)
 include(LXQtCompilerSettings NO_POLICY_SCOPE)
 message(STATUS "Qt version: ${Qt6Core_VERSION}")
 

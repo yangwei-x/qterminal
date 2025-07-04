@@ -1,0 +1,3 @@
+[submodule "qtermwidget"]
+	path = qtermwidget
+	url = git@github.com:yangwei-x/qtermwidget.git
