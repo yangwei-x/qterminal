@@ -43,9 +43,9 @@
 #include "bookmarkswidget.h"
 #include "qterminalapp.h"
 #include "dbusaddressable.h"
+#include <QWindow>
 
-#include <LayerShellQt/Shell>
-#include <LayerShellQt/Window>
+#include "layershellqt_stub.h"
 
 typedef std::function<bool(MainWindow&, QAction *)> checkfn;
 Q_DECLARE_METATYPE(checkfn)

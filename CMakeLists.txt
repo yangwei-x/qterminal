@@ -23,7 +23,7 @@ endif()
 # Minimum Versions
 set(LXQTBT_MINIMUM_VERSION "2.2.0")
 set(QTERMWIDGET_MINIMUM_VERSION "2.2.0")
-set(QT_MINIMUM_VERSION "6.6.0")
+set(QT_MINIMUM_VERSION "6.5.0")
 set(QT_MAJOR_VERSION "6")
 set(SHELLQT_MINIMUM_VERSION "6.0.0")
 
@@ -31,7 +31,7 @@ find_package(Qt6Core ${QT_MINIMUM_VERSION} REQUIRED)
 find_package(Qt6Gui ${QT_MINIMUM_VERSION} REQUIRED)
 find_package(Qt6LinguistTools ${QT_MINIMUM_VERSION} REQUIRED)
 find_package(Qt6Widgets ${QT_MINIMUM_VERSION} REQUIRED)
-find_package(LayerShellQt ${SHELLQT_MINIMUM_VERSION} REQUIRED)
+# find_package(LayerShellQt ${SHELLQT_MINIMUM_VERSION} REQUIRED)
 if(UNIX)
     find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
     find_package(Qt6 COMPONENTS Core REQUIRED)
@@ -209,7 +209,7 @@ target_link_libraries(${EXE_NAME}
     Qt6::Gui
     Qt6::Widgets
     qtermwidget6
-    LayerShellQtInterface
+    # LayerShellQtInterface
 )
 if(QXT_FOUND)
     target_link_libraries(${EXE_NAME} ${QXT_CORE_LIB} ${QXT_GUI_LIB})
