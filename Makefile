@@ -5,7 +5,25 @@
 BUILD_DIR = build
 CMAKE = cmake
 MAKE = make
-NPROC = $(shell nproc)
+
+# Detect operating system
+ifeq ($(OS),Windows_NT)
+    # Windows
+    NPROC = $(shell if exist "%NUMBER_OF_PROCESSORS%" (echo %NUMBER_OF_PROCESSORS%) else (echo 4))
+    PLATFORM = Windows
+    DEV_NULL = nul
+    WHICH_CMD = where
+    MKDIR = if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+    RM = rmdir /s /q
+else
+    # Unix-like (Linux, macOS, etc.)
+    NPROC = $(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+    PLATFORM = Unix
+    DEV_NULL = /dev/null
+    WHICH_CMD = which
+    MKDIR = mkdir -p $(BUILD_DIR)
+    RM = rm -rf
+endif
 
 # Default target
 .PHONY: all
@@ -50,7 +68,11 @@ JOBS ?= $(NPROC)
 # Create build directory
 $(BUILD_DIR):
 	@echo "Creating build directory..."
+ifeq ($(OS),Windows_NT)
+	@if not exist "$(BUILD_DIR)" mkdir "$(BUILD_DIR)"
+else
 	@mkdir -p $(BUILD_DIR)
+endif
 
 # Configure target
 .PHONY: configure
@@ -95,7 +117,11 @@ clean:
 .PHONY: distclean
 distclean:
 	@echo "Removing build directory..."
+ifeq ($(OS),Windows_NT)
+	@if exist "$(BUILD_DIR)" rmdir /s /q "$(BUILD_DIR)"
+else
 	@rm -rf $(BUILD_DIR)
+endif
 	@echo "Clean complete."
 
 # Rebuild target
@@ -133,12 +159,24 @@ package: build-project
 .PHONY: dev-setup
 dev-setup:
 	@echo "Setting up development environment..."
+ifeq ($(OS),Windows_NT)
+	@echo "Windows development setup:"
+	@echo "Please install the following manually:"
+	@echo "1. Qt6 SDK from https://www.qt.io/download"
+	@echo "2. CMake from https://cmake.org/download/"
+	@echo "3. Visual Studio 2019/2022 or MinGW-w64"
+	@echo "4. Git for Windows"
+	@echo "5. Add Qt6, CMake to PATH environment variable"
+	@echo "6. For full functionality, use Windows Subsystem for Linux (WSL)"
+	@echo "   or install a compatible terminal library"
+else
 	@echo "Installing development dependencies..."
 	@sudo apt update
 	@sudo apt install -y qt6-base-dev qt6-base-dev-tools qt6-tools-dev \
 		qt6-tools-dev-tools libqt6core6t64 libqt6gui6t64 libqt6widgets6t64 \
 		libqt6dbus6t64 qt6-l10n-tools cmake build-essential git \
 		libx11-dev pkg-config
+endif
 	@echo "Development environment setup complete."
 
 # Check dependencies

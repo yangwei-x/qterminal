@@ -10,6 +10,12 @@ This project is licensed under the terms of the [GPLv2](https://www.gnu.org/lice
 
 ## Installation
 
+### Cross-Platform Support
+
+QTerminal now includes experimental Windows support. For detailed information about Windows compatibility and build instructions, see [README-Windows.md](README-Windows.md).
+
+**Note**: Windows support is experimental and has limitations due to the terminal emulation being primarily designed for Unix-like systems.
+
 ### Compiling sources
 
 Dependencies Qt ≥ 6.6.0 and [QTermWidget](https://github.com/lxqt/qtermwidget).

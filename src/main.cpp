@@ -19,12 +19,43 @@
 #include <QApplication>
 #include <QtGlobal>
 
+#ifdef _WIN32
+    #include "win32/windows_compat.h"
+#endif
+
 #include <cassert>
 #include <cstdio>
-#include <getopt.h>
 #include <cstdlib>
-#include <unistd.h>
 #include <utility>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #include <io.h>
+    #include <direct.h>
+    #define chdir _chdir
+    // Define getopt structures and constants for Windows
+    struct option {
+        const char *name;
+        int has_arg;
+        int *flag;
+        int val;
+    };
+    #define no_argument 0
+    #define required_argument 1
+    #define optional_argument 2
+    
+    // Windows getopt implementation
+    char *optarg = nullptr;
+    int optind = 1;
+    int opterr = 1;
+    int optopt = 0;
+    
+    int getopt_long(int argc, char *const argv[], const char *optstring,
+                    const struct option *longopts, int *longindex);
+#else
+    #include <getopt.h>
+    #include <unistd.h>
+#endif
 
 #ifdef HAVE_QDBUS
     #include <QtDBus/QtDBus>
@@ -132,7 +163,11 @@ int main(int argc, char *argv[])
         // or use `open qterminal.app`, $PWD is set to /. Workaround that by
         // go to $HOME first.
         if (chdir(QDir::homePath().toLatin1().data())) {
+#ifdef _WIN32
+            qDebug() << "Failed to chdir to $HOME" << QDir::homePath() << "Error code:" << errno;
+#else
             qDebug() << "Failed to chdir to $HOME" << QDir::homePath() << strerror(errno);
+#endif
         }
 
         // also initializes $LANG
@@ -394,5 +429,120 @@ bool QTerminalApp::isPrimaryInstance() {
 }
 
 
+#endif
+
+#ifdef _WIN32
+// Windows getopt implementation
+int getopt_long(int argc, char *const argv[], const char *optstring,
+                const struct option *longopts, int *longindex) {
+    static int next_char = 0;
+    static char *current_arg = nullptr;
+    
+    if (optind >= argc || argv[optind] == nullptr) {
+        return -1;
+    }
+    
+    if (current_arg == nullptr) {
+        current_arg = argv[optind];
+        next_char = 0;
+        
+        if (current_arg[0] != '-') {
+            return -1;
+        }
+        
+        if (current_arg[1] == '-') {
+            // Long option
+            if (current_arg[2] == '\0') {
+                // End of options
+                optind++;
+                return -1;
+            }
+            
+            char *option_name = current_arg + 2;
+            char *equals = strchr(option_name, '=');
+            
+            if (longopts != nullptr) {
+                for (int i = 0; longopts[i].name != nullptr; i++) {
+                    size_t name_len = strlen(longopts[i].name);
+                    if (equals != nullptr) {
+                        if (strncmp(option_name, longopts[i].name, equals - option_name) == 0 &&
+                            name_len == (size_t)(equals - option_name)) {
+                            if (longopts[i].has_arg == no_argument) {
+                                return -1; // Error: option doesn't take argument
+                            }
+                            optarg = equals + 1;
+                            optind++;
+                            current_arg = nullptr;
+                            return longopts[i].val;
+                        }
+                    } else {
+                        if (strcmp(option_name, longopts[i].name) == 0) {
+                            if (longopts[i].has_arg == required_argument) {
+                                if (optind + 1 >= argc) {
+                                    return -1; // Error: option requires argument
+                                }
+                                optarg = argv[optind + 1];
+                                optind += 2;
+                            } else {
+                                optarg = nullptr;
+                                optind++;
+                            }
+                            current_arg = nullptr;
+                            return longopts[i].val;
+                        }
+                    }
+                }
+            }
+            return -1; // Unknown long option
+        } else {
+            next_char = 1;
+        }
+    }
+    
+    // Short option
+    char c = current_arg[next_char];
+    if (c == '\0') {
+        optind++;
+        current_arg = nullptr;
+        return getopt_long(argc, argv, optstring, longopts, longindex);
+    }
+    
+    next_char++;
+    
+    char *option_char = strchr(optstring, c);
+    if (option_char == nullptr) {
+        if (current_arg[next_char] == '\0') {
+            optind++;
+            current_arg = nullptr;
+        }
+        return '?';
+    }
+    
+    if (option_char[1] == ':') {
+        // Option takes argument
+        if (current_arg[next_char] != '\0') {
+            optarg = current_arg + next_char;
+            optind++;
+            current_arg = nullptr;
+        } else {
+            if (optind + 1 >= argc) {
+                optind++;
+                current_arg = nullptr;
+                return '?';
+            }
+            optarg = argv[optind + 1];
+            optind += 2;
+            current_arg = nullptr;
+        }
+    } else {
+        optarg = nullptr;
+        if (current_arg[next_char] == '\0') {
+            optind++;
+            current_arg = nullptr;
+        }
+    }
+    
+    return c;
+}
 #endif
 

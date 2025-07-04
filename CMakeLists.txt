@@ -8,6 +8,11 @@ project(qterminal)
 
 include(GNUInstallDirs)
 
+# Include Windows-specific configuration
+if(WIN32)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/WindowsConfig.cmake)
+endif()
+
 # qterminal version
 set(QTERMINAL_VERSION "2.2.1")
 
