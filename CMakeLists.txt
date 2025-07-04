@@ -8,6 +8,11 @@ project(qterminal)
 
 include(GNUInstallDirs)
 
+# Include Windows-specific configuration
+if(WIN32)
+    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/WindowsConfig.cmake)
+endif()
+
 # qterminal version
 set(QTERMINAL_VERSION "2.2.1")
 
@@ -21,9 +26,7 @@ endif()
 # we need qpa/qplatformnativeinterface.h for global shortcut
 
 # Minimum Versions
-set(LXQTBT_MINIMUM_VERSION "2.2.0")
-set(QTERMWIDGET_MINIMUM_VERSION "2.2.0")
-set(QT_MINIMUM_VERSION "6.6.0")
+set(QT_MINIMUM_VERSION "6.4.0")
 set(QT_MAJOR_VERSION "6")
 set(SHELLQT_MINIMUM_VERSION "6.0.0")
 
@@ -31,17 +34,17 @@ find_package(Qt6Core ${QT_MINIMUM_VERSION} REQUIRED)
 find_package(Qt6Gui ${QT_MINIMUM_VERSION} REQUIRED)
 find_package(Qt6LinguistTools ${QT_MINIMUM_VERSION} REQUIRED)
 find_package(Qt6Widgets ${QT_MINIMUM_VERSION} REQUIRED)
-find_package(LayerShellQt ${SHELLQT_MINIMUM_VERSION} REQUIRED)
 if(UNIX)
     find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
     find_package(Qt6 COMPONENTS Core REQUIRED)
 endif()
-find_package(QTermWidget6 ${QTERMWIDGET_MINIMUM_VERSION} REQUIRED)
-find_package(lxqt2-build-tools ${LXQTBT_MINIMUM_VERSION} REQUIRED)
 
 if (BUILD_TESTS)
     find_package(Qt6 ${QT_MINIMUM_VERSION} CONFIG REQUIRED Test)
 endif()
+
+# Add cmake modules to the path
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 include(LXQtPreventInSourceBuilds)
 include(FindPkgConfig)
@@ -49,6 +52,9 @@ pkg_check_modules(LIBCANBERRA libcanberra)
 include(LXQtTranslateTs)
 include(LXQtTranslateDesktop)
 include(LXQtCompilerSettings NO_POLICY_SCOPE)
+
+# Add qtermwidget as a subdirectory to build it as a static library
+add_subdirectory(qtermwidget)
 message(STATUS "Qt version: ${Qt6Core_VERSION}")
 
 # TODO remove Qxt
@@ -160,6 +166,7 @@ include_directories(
     "${PROJECT_SOURCE_DIR}"
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_BINARY_DIR}"
+    "${PROJECT_SOURCE_DIR}/qtermwidget/lib"
     ${QXT_INCLUDE_DIRS}
 )
 if(X11_FOUND)
@@ -209,7 +216,7 @@ target_link_libraries(${EXE_NAME}
     Qt6::Gui
     Qt6::Widgets
     qtermwidget6
-    LayerShellQtInterface
+    # LayerShellQtInterface
 )
 if(QXT_FOUND)
     target_link_libraries(${EXE_NAME} ${QXT_CORE_LIB} ${QXT_GUI_LIB})

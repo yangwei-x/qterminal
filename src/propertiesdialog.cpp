@@ -31,8 +31,7 @@
 #include "config.h"
 #include "qterminalapp.h"
 
-#include <LayerShellQt/Shell>
-#include <LayerShellQt/Window>
+#include "layershellqt_stub.h"
 
 void KeySequenceEdit::keyPressEvent(QKeyEvent* event)
 {
