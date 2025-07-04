@@ -59,7 +59,7 @@
 #
 
 # See https://bugreports.qt.io/browse/QTBUG-95791
-find_package(Qt6 "6.5" REQUIRED COMPONENTS LinguistTools)
+find_package(Qt6 "${QT_MINIMUM_VERSION}" REQUIRED COMPONENTS LinguistTools)
 
 function(lxqt_translate_ts qmFiles)
     set(oneValueArgs
