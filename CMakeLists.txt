@@ -21,7 +21,7 @@ endif()
 # we need qpa/qplatformnativeinterface.h for global shortcut
 
 # Minimum Versions
-set(QT_MINIMUM_VERSION "6.5.0")
+set(QT_MINIMUM_VERSION "6.4.0")
 set(QT_MAJOR_VERSION "6")
 set(SHELLQT_MINIMUM_VERSION "6.0.0")
 
@@ -46,10 +46,10 @@ include(FindPkgConfig)
 pkg_check_modules(LIBCANBERRA libcanberra)
 include(LXQtTranslateTs)
 include(LXQtTranslateDesktop)
+include(LXQtCompilerSettings NO_POLICY_SCOPE)
 
 # Add qtermwidget as a subdirectory to build it as a static library
 add_subdirectory(qtermwidget)
-include(LXQtCompilerSettings NO_POLICY_SCOPE)
 message(STATUS "Qt version: ${Qt6Core_VERSION}")
 
 # TODO remove Qxt
@@ -161,6 +161,7 @@ include_directories(
     "${PROJECT_SOURCE_DIR}"
     "${PROJECT_SOURCE_DIR}/src"
     "${PROJECT_BINARY_DIR}"
+    "${PROJECT_SOURCE_DIR}/qtermwidget/lib"
     ${QXT_INCLUDE_DIRS}
 )
 if(X11_FOUND)
