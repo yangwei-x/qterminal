@@ -22,7 +22,6 @@ endif()
 
 # Minimum Versions
 set(LXQTBT_MINIMUM_VERSION "2.2.0")
-set(QTERMWIDGET_MINIMUM_VERSION "2.2.0")
 set(QT_MINIMUM_VERSION "6.5.0")
 set(QT_MAJOR_VERSION "6")
 set(SHELLQT_MINIMUM_VERSION "6.0.0")
@@ -36,7 +35,6 @@ if(UNIX)
     find_package(Qt6DBus ${QT_MINIMUM_VERSION} REQUIRED)
     find_package(Qt6 COMPONENTS Core REQUIRED)
 endif()
-find_package(QTermWidget6 ${QTERMWIDGET_MINIMUM_VERSION} REQUIRED)
 find_package(lxqt2-build-tools ${LXQTBT_MINIMUM_VERSION} REQUIRED)
 
 if (BUILD_TESTS)
@@ -48,6 +46,9 @@ include(FindPkgConfig)
 pkg_check_modules(LIBCANBERRA libcanberra)
 include(LXQtTranslateTs)
 include(LXQtTranslateDesktop)
+
+# Add qtermwidget as a subdirectory to build it as a static library
+add_subdirectory(../qtermwidget qtermwidget)
 include(LXQtCompilerSettings NO_POLICY_SCOPE)
 message(STATUS "Qt version: ${Qt6Core_VERSION}")
 
